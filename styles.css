@@ -288,3 +288,5 @@ input[type=range]:active::-webkit-slider-thumb{transform:scaleX(1.3)}
 .hero__row{grid-template-areas:"only only only" "lead status act"}
 .hero__only{grid-area:only}.hero__lead{grid-area:lead}.status{grid-area:status}.hero__act{grid-area:act}
 @media (max-width:900px){.hero__row{grid-template-areas:"only" "lead" "status" "act"}}
+.hero__only{font-size:clamp(1.4rem,2.6vw,2.6rem);max-width:none}
+.js .footer__big{transform:none;opacity:1;transition:none}
