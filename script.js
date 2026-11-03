@@ -82,7 +82,7 @@ const LEAD_ENDPOINT = 'https://lead-relay.leestygpt.workers.dev/lead/6NBQAEVEPU'
   const timer = setInterval(tickTimer, 1000);
 
   const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
-  const FROM = [243, 230, 225], TO = [228, 238, 227];
+  const FROM = [230, 236, 248], TO = [230, 245, 238];
   const root = document.documentElement;
 
   const progressBar = $('#progress');
@@ -263,7 +263,8 @@ const LEAD_ENDPOINT = 'https://lead-relay.leestygpt.workers.dev/lead/6NBQAEVEPU'
     if (!payload.name || !payload.name.trim()) { $('[name=name]', form).closest('.fld').classList.add('err'); bad = true; }
     if (digits.length < 11) { $('[name=phone]', form).closest('.fld').classList.add('err'); bad = true; }
     if (bad) { msg.className = 'form__msg bad'; msg.textContent = 'Заполните имя и телефон полностью.'; return; }
-    if (!$('#agree').checked) { msg.className = 'form__msg bad'; msg.textContent = 'Нужно согласие на обработку данных.'; return; }
+    if (!$$('.formdoc', form).every(x => x.checked)) { msg.className = 'form__msg bad'; msg.textContent = 'Отметьте все четыре документа.'; return; }
+    try { sessionStorage.setItem('docs-ok', '1'); } catch (_) {}
 
     if (touched) {
       payload.comment = (payload.comment ? payload.comment + '\n\n' : '') +
@@ -292,4 +293,27 @@ const LEAD_ENDPOINT = 'https://lead-relay.leestygpt.workers.dev/lead/6NBQAEVEPU'
       setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 3500);
     }
   });
+
+  /* ---------- согласия перед Telegram ---------- */
+  const gate = $('#gate'), go = $('#gateGo'), boxes = $$('.gatedoc');
+  const okStored = () => { try { return sessionStorage.getItem('docs-ok') === '1'; } catch (_) { return false; } };
+  const syncGo = () => {
+    const all = boxes.every(b => b.checked);
+    go.setAttribute('aria-disabled', String(!all));
+    go.style.opacity = all ? '' : '.45';
+    go.style.pointerEvents = all ? '' : 'none';
+  };
+  boxes.forEach(b => b.addEventListener('change', syncGo));
+  syncGo();
+  $$('[data-gate]').forEach(a => a.addEventListener('click', e => {
+    if (okStored() || !gate || !gate.showModal) return;
+    e.preventDefault();
+    go.href = a.href;
+    gate.showModal();
+  }));
+  go?.addEventListener('click', () => {
+    try { sessionStorage.setItem('docs-ok', '1'); } catch (_) {}
+    gate.close();
+  });
+  $('#gateX')?.addEventListener('click', () => gate.close());
 })();
